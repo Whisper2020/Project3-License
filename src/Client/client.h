@@ -6,7 +6,6 @@
 #include "WinSock2.h"
 #include <iostream>
 #include <thread>
-#include <mutex>
 #pragma once
 #pragma comment(lib, "Ws2_32.lib")
 using namespace std;
@@ -26,10 +25,18 @@ public:
     int Receive(PBYTE buf, const int len);
     int Send(PBYTE buf, const int len);
     void Disconnect();
+protected:
+    SOCKADDR_IN sin;
 };
 
-class Client: Client_Socket {
+class Client: protected Client_Socket {
 public:
     int getLicense();
+    int retLicense();
     Client(const char* hostip, const char* port);
+private:
+    bool running = false;
+    thread *tAns;
+    void startAnswer();
+    friend void answerThread(Client* p);
 };

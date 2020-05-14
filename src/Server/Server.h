@@ -4,6 +4,7 @@
 #include <thread>
 #include <cstdio>
 #include <cstring>
+#include <vector>
 #include <Windows.h>
 //#include <WinSock2.h>
 #include <direct.h>
@@ -37,5 +38,10 @@ class Server: Server_Socket {
 public:
     void Run();
     Server(const char* port);
-
+private:
+    bool running = false;
+    std::thread *tPoll;
+    std::vector <sockaddr_in> Cli_Cluster;
+    void startPolling();
+    friend void pollThread(Server* p);
 };
