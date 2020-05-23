@@ -36,7 +36,7 @@ public:
     Client(const char* hostip, const char* port);
 private:
     bool running = false;
-    thread *tAns;
+    thread *tAns = NULL;
     void startAnswer();
     friend void answerThread(Client* p);
 };

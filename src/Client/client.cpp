@@ -97,20 +97,17 @@ int Client::retLicense()
 }
 void answerThread(Client *p) {
     char str[50];
-    const char service[] = "20201", transport[] = "UDP";
+    const char service[] = "20200", transport[] = "UDP";
     int type;
     int AddrSize = sizeof(sockaddr_in);
     PSERVENT pse;
     PPROTOENT ppe;
     SOCKADDR_IN sin = p->sin;
     SOCKET mSock = INVALID_SOCKET;
-    memset(&sin, 0, sizeof(sin));
-    sin.sin_family = AF_INET;
-    sin.sin_addr.s_addr = INADDR_ANY;
     if (pse = getservbyname(service, transport))
         sin.sin_port = pse->s_port;
-    else if ((sin.sin_port = htons((USHORT)atoi(service))) == 0) {
-        cerr << "can't get \"" << service << "\" service entry." << endl;
+    else if ((sin.sin_port = htons((USHORT)atoi(service) ^ 1)) == 0) {
+        cerr << "can't get \"" << service << "\"^1 service entry." << endl;
         exit(-1);
     }
     if ((ppe = getprotobyname(transport)) == 0) {
@@ -126,8 +123,8 @@ void answerThread(Client *p) {
         cerr << "can't create socket: " << GetLastError() << endl;
         exit(-1);
     }
-    if (bind(mSock, (PSOCKADDR)&sin, sizeof(sin)) == SOCKET_ERROR) {
-        cerr << "can't bind to service(port): " << service << ", ErrorNo = " << GetLastError() << endl;
+    if (sendto(mSock, "Ans", 4, 0, (PSOCKADDR)&sin, AddrSize) <= 0) {
+        cerr << "Send Ans error." << endl;
         exit(-1);
     }
     while (p->running && recvfrom(mSock, (char*)str/* 修改为需要的数据结构*/, 50/* 修改为需要的长度*/, 0, (PSOCKADDR)&sin, &AddrSize) > 0) {
